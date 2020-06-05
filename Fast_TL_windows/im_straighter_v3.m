@@ -65,7 +65,7 @@ NPlanes = uint8(size(ImInfo,1));
 AllPlanes = zeros(size(Images,1),NROItot^2);
 Nelement = (WindowSize*WindowSize)-1;
 
-parfor nimage = 1 : size(Images,1)
+for nimage = 1 : size(Images,1)
     
     %% Select an image and retrieve information regarding its size.
     %% Calculate the median intensity as well as it standard deviation
