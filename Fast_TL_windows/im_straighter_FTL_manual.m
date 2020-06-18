@@ -154,7 +154,7 @@ colorbar
 end
 
 %% Calculate the in_focus image
-%% ============================
+%% =============================
 
 function template = Apply_ref_planes(imName, Ref_plane, WindowSize, NROItot, template)
 
