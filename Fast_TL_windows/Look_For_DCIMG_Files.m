@@ -1,5 +1,6 @@
-function [FinalFileName, FinaleDirectoryName] = Look_For_TIFF_Files_dcimg_conversion(DirectoryName)
+function [FinalFileName, FinaleDirectoryName, DirectoryName] = Look_For_DCIMG_Files
 
+DirectoryName = uigetdir('E:\');
 cd(DirectoryName)
 dim = 0;
 AllDirectories = {};
@@ -7,17 +8,18 @@ FinalFileName = {};
 FinaleDirectoryName = {};
 dirinfo = dir();
 
-% Look inside the selected folder whether there is a TIFF file
+% Look inside the selected folder whether there is a DCIMG file
 % --------------------------------------------------------------
 
-dirinfo_TIFF = dir('*.tif');
+dirinfo_DCIMG = dir('*.dcimg');
 
-if ~isempty(dirinfo_TIFF)
-    for n = 1 : size(dirinfo_TIFF,1)
-        FinaleDirectoryName{end+1,1} = dirinfo_TIFF(n).folder;
-        FinalFileName{end+1,1} = dirinfo_TIFF(n).name; % Make sure the function is only returning directories and no files
+if ~isempty(dirinfo_DCIMG)
+    for n = 1 : size(dirinfo_DCIMG,1)
+            FinalFileName{end+1,1} = dirinfo_DCIMG(n).name; % Make sure the function is only returning directories and no files
+            FinaleDirectoryName{end+1,1} = dirinfo_DCIMG(n).folder;
     end
 end
+
 
 % Look at the folders inside the selected directory
 % -------------------------------------------------
@@ -107,15 +109,15 @@ end
 for n = 1 : size(Directories,1)
     cd(Directories{n})
     
-    dirinfo_TIFF = dir('*.tif');
-    if ~isempty(dirinfo_TIFF)
-        for nKymoFile = 1 : size(dirinfo_TIFF,1)
+    dirinfo_DCIMG = dir('*.dcimg');
+    if ~isempty(dirinfo_DCIMG)
+        for nKymoFile = 1 : size(dirinfo_DCIMG,1)
             if ispc
-                FinalFileName{end+1,1} = dirinfo_TIFF(nKymoFile).name;
-                FinaleDirectoryName{end+1,1} = dirinfo_TIFF(nKymoFile).folder;
+                FinalFileName{end+1,1} = dirinfo_DCIMG(nKymoFile).name;
+                FinaleDirectoryName{end+1,1} = dirinfo_DCIMG(nKymoFile).folder;
             elseif isunix
-                FinalFileName{end+1,1} = dirinfo_TIFF(nKymoFile).name;
-                FinaleDirectoryName{end+1,1} = dirinfo_TIFF(nKymoFile).folder;
+                FinalFileName{end+1,1} = dirinfo_DCIMG(nKymoFile).name;
+                FinaleDirectoryName{end+1,1} = dirinfo_DCIMG(nKymoFile).folder;
             end
         end
     end

@@ -1,3 +1,8 @@
+%% 19-06-2020 :  This function was written in the case the im_straighter 
+%% algorithm is not working properly. The following algoritm is also calculating
+%% the in-focus image but after defining manually the planes. 
+%% ==========================================================
+
 clear all
 close all
 clc

@@ -4,16 +4,73 @@
 %% the conversion of dcimg image files in order to apply the refocus software
 %% to each ROI and channel.
 %% 05-06-2020 : Change the way the movies are read as well as the name of the files
-%% -----------------------
+%% 19-06-2020 : The function is now stand-alone (not called from another program)
+%% ================================================================================
 
-function im_straighter_FTL(WindowSize, verbose, Folder_name, TIFF, Save_folder)
+clear all
+close all
+clc
+
+Analyzed_folder = uigetdir('C:\Users\sCMOS-1\Desktop_');
+
+%% Ask the number of ROIs that were acquired during each cycle
+%% -----------------------------------------------------------
+
+prompt = {'Enter the number of ROIs:',...
+    'Enter the number of the channels for the in_focus calculation (coma separated):'};
+title = 'Input';
+dims = [1 35];
+definput = {'9', ''};
+answer = inputdlg(prompt,title,dims,definput);
+
+N_ROI = str2double(answer{1});
+In_Focus_Channels = str2num(answer{2});
+
+%% Launch the analysis for each ROI
+%% ================================
+
+if ~isempty(In_Focus_Channels)
+    for n_channel = 1 : size(In_Focus_Channels,2)
+        
+        Current_analyzed_folder = strcat(Analyzed_folder, '\Ch_', num2str(In_Focus_Channels(n_channel)));
+        [TIFF_FileName, ~] = Look_For_TIFF_Files_dcimg_conversion(Current_analyzed_folder);
+        N_tiff = size(TIFF_FileName,1);
+
+        for n_roi = 1 : N_ROI
+       
+            Selected_files = zeros(N_tiff,1);
+            Char = strcat('ROI_', num2str(n_roi));
+            
+            for n_file = 1 : N_tiff
+                if ~isempty(strfind(TIFF_FileName{n_file}, Char))
+                    Selected_files(n_file) = 1;
+                end
+            end
+            
+            TIFF_selected = TIFF_FileName(Selected_files==1);
+            
+            if ~isempty(TIFF_selected)
+                In_Focus_dir = strcat(Current_analyzed_folder, '\In_Focus_images');
+                mkdir(In_Focus_dir)
+                In_Focus_saving_folder = strcat(In_Focus_dir, '\ROI_', num2str(n_roi));
+                mkdir(In_Focus_saving_folder)
+                im_straighter(512, 0, Current_analyzed_folder, TIFF_selected, In_Focus_saving_folder)
+            end
+        end
+    end
+end
+
+%% Definition of the im_straighter function
+%%=========================================
+
+function im_straighter(WindowSize, verbose, Folder_name, TIFF, Save_folder)
 
 if ~verbose
     close all
 end
 
 %% Load the baseline
-%% _________________
+%% -----------------
 
 cd('C:\Users\sCMOS-1\Desktop\Matlab code\Image_refocusing\Baseline_data\BaseLine_references')
 if WindowSize == 512
@@ -27,7 +84,7 @@ end
 BaseLine = BaseLine.OTF_all;
 
 %% Read the first image in order to define the image size and the arrays
-%% _____________________________________________________________________
+%% ---------------------------------------------------------------------
 
 cd(Folder_name)
 imName = TIFF{1};
@@ -53,7 +110,7 @@ parfor nimage = 1 : size(TIFF,1)
     %% Select an image and retrieve information regarding its size.
     %% Calculate the median intensity as well as it standard deviation
     %% in order to normalize each image of the stack.
-    %% _____________________________________________
+    %% ----------------------------------------------
     
     cd(Folder_name)
     im = zeros(Lx,Ly,NPlanes);
@@ -91,7 +148,7 @@ parfor nimage = 1 : size(TIFF,1)
     %% In order to compare the results for each plane, the area of each
     %% curve is calculated. The plane displaying the largest area will also
     %% be the one with the sharpest details.
-    %% ____________________________________
+    %% -------------------------------------
     
     for ROI_x = 1:NROItot
         for ROI_y = 1:NROItot
@@ -217,7 +274,7 @@ end
 saveas(gcf,'Plane_distribution_time.png')
 
 %% For each ROI, calculate the plane that was selected the most
-%% ____________________________________________________________
+%% ------------------------------------------------------------
 
 MaxLikelihood_Planes = zeros(1, NROItot*NROItot);
 
@@ -231,7 +288,7 @@ end
 %% separated by more than 2 planes from the MaxLikelihood, then the analysis
 %% is performed again using only the planes that are the closest to the
 %% MaxLikelihood.
-%% _____________
+%% -------------
 
 for nimage = 1 : size(TIFF,1)
        
@@ -267,7 +324,7 @@ for nimage = 1 : size(TIFF,1)
     
     % The new "in-focus" image is then saved in a folder with a name fit
     % for super-segger.
-    % ________________
+    % -----------------
     
     cd(Save_folder)
     t = Tiff(imName, 'w');
@@ -293,3 +350,4 @@ for nimage = 1 : size(TIFF,1)
 end
 
 disp('Calculation is done')
+end
